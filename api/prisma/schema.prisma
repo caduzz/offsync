@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum FileType {
+  sound
+  video
+  image
+}
+
+model Region {
+  id   String @id() @default(uuid())
+  name String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  data Data[]
+
+  @@map("region")
+}
+
+model Files {
+  id       String   @id @default(uuid())
+  type     FileType
+  url      String
+  duration Float?
+
+  data_id String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  data Data @relation(fields: [data_id], references: [id])
+
+  @@map("files")
+}
+
+model Locale {
+  id        String @id @default(uuid())
+  latitude  Float
+  longitude Float
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  data Data[]
+
+  @@map("locale")
+}
+
+model Data {
+  id          String @id @default(uuid())
+  description String
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  locale_id String
+  region_id String
+
+  locale Locale @relation(fields: [locale_id], references: [id])
+  region Region @relation(fields: [region_id], references: [id])
+
+  files Files[]
+
+  @@map("data")
+}
