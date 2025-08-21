@@ -17,6 +17,9 @@ export class DataService {
             longitude: Number(data.longitude),
           }
         },
+        user: {
+          connect: { id: "sadad" }
+        },
         region: {
           connect: {
             id: data.region_id,

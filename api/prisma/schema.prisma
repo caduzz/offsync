@@ -19,6 +19,11 @@ enum FileType {
   image
 }
 
+enum UserRole {
+  user
+  admin
+}
+
 model Region {
   id   String @id() @default(uuid())
   name String
@@ -69,11 +74,28 @@ model Data {
 
   locale_id String
   region_id String
+  userId    String
 
   locale Locale @relation(fields: [locale_id], references: [id])
   region Region @relation(fields: [region_id], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
 
   files Files[]
 
   @@map("data")
+}
+
+model User {
+  id       String   @id @default(uuid())
+  username String   @unique
+  password String
+  email    String   @unique
+  role     UserRole @default(user)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+
+  data Data[]
+
+  @@map("user")
 }

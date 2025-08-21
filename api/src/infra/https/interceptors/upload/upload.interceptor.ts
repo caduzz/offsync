@@ -7,7 +7,7 @@ import { extname } from "path";
 
 export type FileData = Express.Multer.File;
 
-export function UploadInterceptor (fileFilter: MulterOptions['fileFilter']) {
+export function UploadInterceptor(fileFilter: MulterOptions['fileFilter']) {
   return UseInterceptors(
     FilesInterceptor('files', 10, {
       fileFilter,

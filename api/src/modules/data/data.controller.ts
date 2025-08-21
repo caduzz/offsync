@@ -1,9 +1,12 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, UseGuards, Session, Request } from '@nestjs/common';
 import { DataService } from './data.service';
 
 import { Data } from 'src/models/data';
 import { Serializer } from 'src/infra/https/interceptors/serializer/serializer.decorator';
 import { CreateData } from './data.dto';
+import { AuthGuard } from '@infra/https/guards/auth.guard';
+
+
 
 @Controller('data')
 export class DataController {
@@ -11,8 +14,8 @@ export class DataController {
 
   @Get('/')
   @Serializer(Data)
-  getAll() {
-    return this.dataService.getAll()
+  getAll(@Request() req: any) {
+    return this.dataService.getAll();
   }
 
   @Post('/')
