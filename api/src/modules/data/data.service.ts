@@ -7,7 +7,7 @@ import { CreateData } from './data.dto';
 export class DataService {
   constructor(private prisma: PrismaService) {}
 
-  create(data: CreateData) {
+  create(data: CreateData, user_id: string) {
     return this.prisma.data.create({
       data: {
         description: data.description,
@@ -18,7 +18,7 @@ export class DataService {
           }
         },
         user: {
-          connect: { id: "sadad" }
+          connect: { id: user_id }
         },
         region: {
           connect: {

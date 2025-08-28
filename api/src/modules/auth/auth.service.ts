@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from '../user/user.service';
+import { AuthPayload } from '@models/auth';
+
 
 @Injectable()
 export class AuthService {
@@ -14,7 +16,7 @@ export class AuthService {
     if (user) {
       const comparePassword = await this.userService.comparePasswords(password, user.password);
       if(comparePassword){
-        const payload = { username: user.username, sub: user.id };
+        const payload: AuthPayload = { username: user.username, user_id: user.id };
         return { access_token: this.jwtService.sign(payload) };
       }
     }

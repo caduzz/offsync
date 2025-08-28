@@ -1,13 +1,31 @@
-import { FileType } from "@prisma/client"
+import { Files } from "@models/files"
+import { Expose, Type } from "class-transformer"
+import { IsLatitude, IsLongitude, IsNumber, IsString, IsUUID } from "class-validator"
 
-export interface CreateData {
+export class CreateData {
+  @Expose()
+  @IsString()
   title: string
+
+  @Expose()
+  @IsString()
   description: string
+
+  @Expose()
+  @IsNumber()
+  @IsLatitude()
   latitude: number
+
+  @Expose()
+  @IsNumber()
+  @IsLongitude()
   longitude: number
+
+  @Expose()
+  @IsUUID()
   region_id: string
-  files: {
-    type: FileType
-    url: string
-  }[]
+
+  @Expose()
+  @Type(() => Files)
+  files: Files[]
 }
