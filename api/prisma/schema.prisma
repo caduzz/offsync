@@ -86,11 +86,12 @@ model Data {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  username String   @unique
-  password String
-  email    String   @unique
-  role     UserRole @default(user)
+  id        String   @id @default(uuid())
+  username  String   @unique
+  password  String
+  email     String   @unique
+  hashed_rt String?
+  role      UserRole @default(user)
 
   created_at DateTime @default(now())
   updated_at DateTime @default(now())
