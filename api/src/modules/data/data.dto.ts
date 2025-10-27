@@ -5,6 +5,14 @@ import { IsLatitude, IsLongitude, IsNumber, IsString, IsUUID } from "class-valid
 
 export class CreateData {
   @ApiProperty({
+    description: 'Title of the data entry',
+    example: 'This is a sample data entry.'
+  })
+  @Expose()
+  @IsString()
+  title: string
+
+  @ApiProperty({
     description: 'Description of the data entry',
     example: 'This is a sample data entry.'
   })

@@ -1,6 +1,12 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const useAsyncStorage = () => {
+interface AsyncStorageType {
+    getAsyncStorage: (type: string) => Promise<null | {}>;
+    setAsyncStorage: (type: string, value: {} | null) => void;
+    removeAsyncStorage: (type: string) => void;
+}
+
+export const useAsyncStorage = (): AsyncStorageType => {
     const getAsyncStorage = async (type: string) => {
         const res = await AsyncStorage.getItem(type)
         if(res){
@@ -15,5 +21,9 @@ export const useAsyncStorage = () => {
         AsyncStorage.setItem(type, data);
     }
 
-    return { getAsyncStorage, setAsyncStorage };
+    const removeAsyncStorage = (type: string) => {
+        AsyncStorage.removeItem(type);
+    }
+
+    return { getAsyncStorage, setAsyncStorage, removeAsyncStorage };
 };

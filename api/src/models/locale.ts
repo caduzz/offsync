@@ -17,3 +17,15 @@ export class Locale {
   @IsLongitude()
   longitude: number
 }
+
+export class CreateLocale {
+  @Expose()
+  @IsNumber()
+  @IsLatitude()
+  latitude: number
+
+  @Expose()
+  @IsNumber()
+  @IsLongitude()
+  longitude: number
+}

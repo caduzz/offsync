@@ -11,3 +11,9 @@ export class Region {
   @IsString()
   name: string
 }
+
+export class CreateRegion {
+  @Expose()
+  @IsString()
+  name: string
+}

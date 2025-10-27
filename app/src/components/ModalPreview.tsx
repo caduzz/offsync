@@ -1,4 +1,4 @@
-import { ImagePickerResult } from "@/@types/imagePicker.r";
+import { ImagePickerResult } from "@/@types/imagePicker";
 import { Ionicons } from "@expo/vector-icons";
 import { useVideoPlayer, VideoView } from "expo-video";
 

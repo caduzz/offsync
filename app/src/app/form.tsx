@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { Text, View, TouchableOpacity, ScrollView, FlatList, ToastAndroid } from 'react-native';
+import { Text, View, TouchableOpacity, ScrollView, FlatList, ToastAndroid, ActivityIndicator } from 'react-native';
 
 import * as Location from 'expo-location';
 
@@ -8,9 +8,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { useNetworkState } from 'expo-network';
 
 import { useAudioRecording } from '@/hooks/useAudioRecording';
-import { useAsyncStorage } from '@/hooks/useAsyncStorage';
 
-import { ImagePickerResult } from '@/@types/imagePicker.r';
+import { ImagePickerResult } from '@/@types/imagePicker';
 
 import ModalPreview from '@/components/ModalPreview';
 
@@ -21,80 +20,36 @@ import FlatListItem from '@/components/FlatListItem';
 import FlatListEmpty from '@/components/FlatListEmpty';
 import AudioPlayer from '@/components/AudioPlayer';
 
-import { Entypo } from '@expo/vector-icons';
+import { Entypo, Ionicons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
+import { FormDataDto } from '@/@types/form';
+import useOnlineSubmit from '@/hooks/useOnlineSubmit';
+import useOfflineSubmit from '@/hooks/useOfflineSubmit';
+import { formatTime } from '@/utils/formatData';
 
 export type MediaType = 'images' | 'videos' | 'livePhotos';
 
 export default function Form() {
-  const [source, setSource] = useState<ImagePickerResult[]>([]);
-  const [selectedSource, setSelectedSource] = useState<ImagePickerResult | null>(null);
-  const { toggleRecording, removeRecord, recording, records, resetRecord, setRecords } = useAudioRecording();
-  const { setAsyncStorage, getAsyncStorage } = useAsyncStorage();
-  const net = useNetworkState();
-  const [location, setLocation] = useState<Location.LocationObject>()
+  const [ loading, setLoading ] = useState(true)
+  const [ source, setSource ] = useState<ImagePickerResult[]>([]);
+  const [ location, setLocation ] = useState<Location.LocationObject>()
+  const [ selectedSource, setSelectedSource ] = useState<ImagePickerResult | null>(null);
+
+  const { toggleRecording, removeRecord, recording, records, resetRecord, isProcessing } = useAudioRecording();
+
+  const { handleSaveOnline } = useOnlineSubmit();
+  const { handleSaveOffline } = useOfflineSubmit();
+
+  const navigation = useNavigation();
+
+  const network = useNetworkState();
   
-  const navigation = useNavigation()
-  
-  const { control, handleSubmit, reset, watch } = useForm({
+  const { control, handleSubmit, reset } = useForm({
     defaultValues: {
-      nome: '',
-      email: '',
-      telefone: '',
-      senha: '',
+      title: '',
+      description: '',
     }
   });
-
-  const formData = watch();
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-
-  const preSaveFormData = async () => {
-    try {
-      const preSaveData = {
-        ...formData,
-        midias: source,
-        audios: records,
-        timestamp: new Date().toISOString()
-      };
-
-      setAsyncStorage('@offsync/pre-save-form', preSaveData);
-    } catch (error) {
-      console.log('Erro ao fazer pré-salvamento:', error);
-    }
-  };
-
-  const loadPreSavedData = async () => {
-    try {
-      const preSavedData = await getAsyncStorage('@offsync/pre-save-form');
-      if (preSavedData) {
-        reset({
-          nome: preSavedData.nome || '',
-          email: preSavedData.email || '',
-          telefone: preSavedData.telefone || '',
-          senha: preSavedData.senha || '',
-        });
-        
-        if (preSavedData.midias) {
-          setSource(preSavedData.midias);
-        }
-        if (preSavedData.audios) {
-          setRecords(preSavedData.audios);
-        }
-      }
-    } catch (error) {
-      console.log('Erro ao carregar dados pré-salvos:', error);
-    } finally {
-      setIsInitialLoad(false);
-    }
-  };
-
-  const clearPreSavedData = async () => {
-    try {
-      setAsyncStorage('@offsync/pre-save-form', null);
-    } catch (error) {
-      console.log('Erro ao limpar dados pré-salvos:', error);
-    }
-  };
 
   const saveFormData = async (data: any) => {
     try {
@@ -102,29 +57,41 @@ export default function Form() {
       
       if(granted) {
         if(location){
-          if (!data.nome || !data.email || !data.telefone || !data.senha) {
-            console.log("erro")
-            ToastAndroid.show('Preencha todos os campos obrigatórios!', ToastAndroid.SHORT);
+          let statusOnline = false;
+          let statusOffline = false;
+
+          if (!data.title || !data.description) {
+            ToastAndroid.show(`Preencha todos os campos obrigatórios! ${data.title && "titulo necessario"} ${data.description && "descrição necessario"}`, ToastAndroid.SHORT);
             return;
           }
 
-          const formDataFile = await getAsyncStorage('formData')
-          const formData = {
-            ...data,
+          const payload: FormDataDto = {
+            title: data.title,
+            description: data.description,
             midias: source,
-            audios: records,
-            location: location.coords,
-            timestamp: location.timestamp
+            sounds: records,
+            region_id: "bde4f786-c3b0-4ca2-952f-16a9140097a9",
+            latitude: location.coords.latitude,
+            longitude: location.coords.longitude
           };
 
-          setAsyncStorage('formData', formDataFile ? [...formDataFile, formData] : [formData]);
-          ToastAndroid.show('Formulário salvo!', ToastAndroid.SHORT);
+          if(network.isConnected){
+           const saveOnline = await handleSaveOnline(payload)
+           statusOnline = saveOnline.status
+          }
 
-          await clearPreSavedData();
-          
-          reset();
-          setSource([]);
-          resetRecord();
+          if (!statusOnline){
+            const saveOffline = await handleSaveOffline(payload)
+            statusOffline = saveOffline.status;
+          }
+
+          console.log(statusOffline, statusOnline)
+
+          if(statusOnline || statusOffline) {
+            reset();
+            setSource([]);
+            resetRecord();
+          }
         }
       }
     } catch (error) {
@@ -158,31 +125,23 @@ export default function Form() {
   };
   
   const getInitialLocation = async () => {
-    let location = await Location.getCurrentPositionAsync({accuracy: 6});
-    setLocation(location)
+    const { granted } = await Location.requestForegroundPermissionsAsync();
+    if (granted) {
+      setLoading(true)
+      let location = await Location.getCurrentPositionAsync({accuracy: Location.Accuracy.High});
+      setLoading(false)
+      setLocation(location)
+   }
   }
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('beforeRemove', () => {
-      if (isInitialLoad) return;
-      preSaveFormData();
-    });
-
-    return unsubscribe;
-  }, [navigation, formData, records, source, isInitialLoad]);
 
   useEffect(() => {
     getInitialLocation()
   }, [])
 
-  useEffect(() => {
-    loadPreSavedData();
-  }, []);
-
   return (
     <View className='flex-1 w-full bg-white'>
-      <View className='flex flex-row items-center justify-between w-full mb-4 pt-16 pb-6 px-8 border-b border-gray-200'>
-        <TouchableOpacity onPress={navigation.goBack}>
+      <View className='flex flex-row items-center justify-center w-full pt-16 pb-6 px-8 border-b border-gray-200 relative'>
+        <TouchableOpacity onPress={navigation.goBack} className='absolute left-6 top-[60px]'>
           <Entypo name='chevron-left' color="#374151" size={25}/>
         </TouchableOpacity>
         <Text className='text-3xl font-bold text-gray-700'>Formulario de dados</Text>
@@ -192,35 +151,37 @@ export default function Form() {
         contentContainerClassName='pt-8'
         showsVerticalScrollIndicator={false}
       >
-        <Text>{location?.coords.accuracy}</Text>
-        <Button onPress={getInitialLocation}>Reload</Button>
+        <View className='w-full mb-6 flex-row items-center justify-between'>
+          <View>
+            <Text>Latitude: {loading ? 'Carregando...' : `${location?.coords.latitude?.toFixed(0)} m`}</Text>
+            <Text>Longitude: {loading ? 'Carregando...' : `${location?.coords.longitude?.toFixed(0)} m`}</Text>
+            <Text>Precisão: {loading ? 'Carregando...' : `${location?.coords.accuracy?.toFixed(0)} m`}</Text>
+          </View>
+          <Button 
+            onPress={getInitialLocation}
+          >
+            {!loading ?
+              <Ionicons name='reload' size={20} color='#6d28d9' className='animate-spin' />
+              :
+              <ActivityIndicator
+                color="#6d28d9"
+              />
+            }
+          </Button>
+        </View>
         <View>
           <Controller
             control={control}
-            name="nome"
+            name="title"
             render={({ field: { onChange, value } }) => (
-              <Input label='Nome' placeholder='Digite seu nome...' value={value} onChangeText={onChange} />
+              <Input label='Título' placeholder='Digite seu título...' value={value} onChangeText={onChange} />
             )}
           />
           <Controller
             control={control}
-            name="email"
+            name="description"
             render={({ field: { onChange, value } }) => (
-              <Input label='Email' placeholder='Digite seu email...' value={value} onChangeText={onChange} />
-            )}
-          />
-          <Controller
-            control={control}
-            name="telefone"
-            render={({ field: { onChange, value } }) => (
-              <Input label='Telefone' placeholder='Digite seu telefone...' value={value} onChangeText={onChange} />
-            )}
-          />
-          <Controller
-            control={control}
-            name="senha"
-            render={({ field: { onChange, value } }) => (
-              <Input label='Senha' placeholder='Digite sua senha...' secureTextEntry value={value} onChangeText={onChange} />
+              <Input label='Descrição' placeholder='Digite sua descrição...' value={value} onChangeText={onChange} />
             )}
           />
 
@@ -301,8 +262,9 @@ export default function Form() {
             <View className="bg-gray-50 rounded-xl p-4">
               <TouchableOpacity 
                 onPress={toggleRecording}
-                className={`py-3 px-6 rounded-lg ${recording?.isRecording ? 'bg-red-600' : 'bg-violet-700'}`}
+                className={`py-3 px-6 rounded-lg ${recording?.isRecording ? 'bg-red-600' : 'bg-violet-700'} disabled:bg-gray-400`}
                 activeOpacity={0.7}
+                disabled={isProcessing}
               >
                 <View className="flex-row items-center justify-center">
                   <Entypo 
@@ -311,15 +273,15 @@ export default function Form() {
                     color='white' 
                   />
                   <Text className='text-white text-base font-semibold ml-2'>
-                    {recording?.isRecording ? 'Parar Gravação' : 'Gravar Áudio'}
+                    {recording?.isRecording ? `Parar Gravação - ${recording.durationMillis}` : 'Gravar Áudio'}
                   </Text>
                 </View>
               </TouchableOpacity>
               {records.length > 0 && (
                 <View className='flex flex-col gap-4 mt-4'>
-                  {records.map(record => (
+                  {records.map((record, index) => (
                     record?.url &&
-                    <AudioPlayer key={record.url} url={record.url} onRemove={removeRecord}/>
+                    <AudioPlayer key={`audio-${index}`} url={record.url} onRemove={removeRecord}/>
                   ))}
                 </View>
               )}

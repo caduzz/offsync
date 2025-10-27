@@ -1,4 +1,4 @@
-import { ImagePickerResult } from "@/@types/imagePicker.r";
+import { ImagePickerResult } from "@/@types/imagePicker";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { Image, TouchableOpacity, View } from "react-native";
 

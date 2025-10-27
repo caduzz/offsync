@@ -1,34 +1,43 @@
 import { formatTime } from "@/utils/formatData";
 import { Entypo, Ionicons } from "@expo/vector-icons";
 import { useAudioPlayer } from "expo-audio";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 import { Text, TouchableOpacity, View } from "react-native";
 
 interface AudioPlayerProps {
-  url: string,
-  onRemove?: (s: string) => void
+  url: string | null,
+  onRemove?: (s: string | null) => void
 }
 
 export default function AudioPlayer ({ url, onRemove }: AudioPlayerProps) {
-  const player = useAudioPlayer({ uri: url }, 100);
+  const player = useAudioPlayer({ uri: url ? url : "" });
+  const [isPlaying, setIsPlaying] = useState<boolean>(Boolean(player.playing));
 
   const toggleAudioPlayback = () => {
-    if(url) {
-      if(!player.playing) {
-        player.play();
-      } else {
-        player.pause();
-      }
+    if (!url) return;
+
+    if (!player.playing) {
+      player.play();
+      setIsPlaying(true);
+    } else {
+      player.pause();
+      setIsPlaying(false);
     }
   }
   
   useEffect(() => {
-    if(player.currentStatus.didJustFinish){
+    if (player.currentStatus.didJustFinish) {
       player.seekTo(0)
       player.pause()
+      setIsPlaying(false);
     }
   }, [player.currentStatus.didJustFinish])
+
+  useEffect(() => {
+    const statusPlaying = (player.currentStatus as any)?.playing ?? player.playing;
+    setIsPlaying(Boolean(statusPlaying));
+  }, [player.currentStatus?.playing, player.playing, player.currentTime])
 
   const progress = player.duration ? player.currentTime / player.duration : 0;
 
@@ -41,7 +50,7 @@ export default function AudioPlayer ({ url, onRemove }: AudioPlayerProps) {
       }
       <TouchableOpacity onPress={toggleAudioPlayback}>
         <Entypo
-          name={player.playing ? 'controller-paus' : 'controller-play'}
+          name={isPlaying ? 'controller-paus' : 'controller-play'}
           size={25}
           color={"#6b7280"}
         />

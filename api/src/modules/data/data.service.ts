@@ -11,6 +11,7 @@ export class DataService {
   async create(data: CreateData, user_id: string): Promise<Data> {
     const createdData = await this.prisma.data.create({
       data: {
+        title: data.title,
         description: data.description,
         locale: {
           create: {

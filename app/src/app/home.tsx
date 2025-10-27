@@ -7,14 +7,16 @@ import { navigate } from 'expo-router/build/global-state/routing';
 import { useAsyncStorage } from '@/hooks/useAsyncStorage';
 
 import AudioPlayer from '@/components/AudioPlayer';
-import Button from '@/components/ui/button';
 import FlatListItem from '@/components/FlatListItem';
 import FlatListEmpty from '@/components/FlatListEmpty';
 import { useFocusEffect } from 'expo-router';
 import ModalPreview from '@/components/ModalPreview';
-import { ImagePickerResult } from '@/@types/imagePicker.r';
-import { Entypo } from '@expo/vector-icons';
+import { ImagePickerResult } from '@/@types/imagePicker';
+import { Entypo, FontAwesome} from '@expo/vector-icons';
 
+import { useAuth } from '@/hooks/useAuth';
+import { FormDataDto } from '@/@types/form';
+import { TagConnected } from '@/components/TagConnected';
 
 export type MediaType = 'images' | 'videos' | 'livePhotos';
 
@@ -23,33 +25,37 @@ export default function Home() {
   const [selectedSource, setSelectedSource] = useState<ImagePickerResult | null>(null);
   const [formData, setFormData] = useState<any>([]);
 
+  const { user } = useAuth()
+
   useFocusEffect(useCallback(() => {
     const fetchData = async () => {
       const data = await getAsyncStorage('formData');
       setFormData(data ? data : []);
-      console.log(data.location)
     };
     fetchData();
   }, []))
 
-  useEffect(() => {
-    console.log(formData.location)
-  }, [formData.location])
-
   return (
     <View className='flex-1 w-full bg-white relative'>
-      <View className='flex flex-row items-center justify-center w-full mb-6 pt-16 pb-6 px-8 border-b border-gray-200'>
-        <Text className='text-3xl font-bold text-gray-700'>Pagina Inicial</Text>
-      </View>      
-      <ScrollView className='w-full px-8' showsVerticalScrollIndicator={false}>
-        {formData.length > 0 ? formData.map((data: any) => (
-          <View key={`key-form-${data.nome}`}>
-            <Text className='text-base mb-2'>Nome: {data.nome}</Text>
-            <Text className='text-base mb-2'>Email: {data.email}</Text>
-            <Text className='text-base mb-2'>Telefone: {data.telefone}</Text>
-            <Text className='text-base mb-2'>Senha: {data.senha}</Text>
-            <Text>{data.location.latitude}</Text>
-            <Text>{data.location.longitude}</Text>
+      <View className='flex flex-col items-center justify-center w-full pt-16 pb-6 px-8 border-b border-gray-200'>
+        <Text className='text-3xl font-bold text-gray-700'>Bem vindo ao offsync</Text>
+        <Text className='text-2xl font-bold text-gray-700'>Você esta na conta {user?.username}</Text>
+      </View>
+      <View className='flex flex-row itens-between justify-between p-4'>
+
+        <TagConnected connected="conectado" disconnected="desconectado"/>
+      </View>
+      <ScrollView className='w-full px-8 mt-4' contentContainerClassName='pb-20' showsVerticalScrollIndicator={false}>
+        {formData.length > 0 ? formData.map((data: FormDataDto, index: number) => (
+          <View key={`key-form-${index}`}>
+            <View>
+              <Text className='text-base mb-2'>Titulo: {data.title}</Text>
+              <Text className='text-base mb-2'>Descrição: {data.description}</Text>
+            </View>
+            <View className='flex flex-row gap-4'>
+              <Text>latitude: {data?.latitude.toFixed(4)}</Text>
+              <Text>longitude: {data?.longitude.toFixed(4)}</Text>
+            </View>
             {data.midias && data.midias.length > 0 && (
               <View className='mb-4'>
                 <View className="flex-row items-center justify-between mb-4">
@@ -84,21 +90,21 @@ export default function Home() {
                 </View>
               </View>
             )}
-            {data.audios && data.audios.length > 0 && (
+            {data.sounds && data.sounds.length > 0 && (
               <View className='mb-4'>
                 <View className="flex-row items-center justify-between mb-4">
                   <Text className='text-lg font-semibold text-gray-700'>Galeria de Audios:</Text>
-                  {data.audios.length > 0 && (
+                  {data.sounds.length > 0 && (
                     <View className="bg-violet-100 px-3 py-1 rounded-full">
                       <Text className="text-violet-700 text-sm font-medium">
-                        {data.audios.length} {data.audios.length === 1 ? 'item' : 'itens'}
+                        {data.sounds.length} {data.sounds.length === 1 ? 'item' : 'itens'}
                       </Text>
                     </View>
                   )}
                 </View>
                 <View className="bg-gray-50 rounded-xl">
                   <FlatList
-                    data={data.audios}
+                    data={data.sounds}
                     renderItem={({ item }) => (
                       <AudioPlayer key={item.url} url={item.url} />
                     )}

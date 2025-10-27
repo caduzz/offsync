@@ -15,7 +15,7 @@ export class User {
     description: 'Unique identifier of the user',
     example: 'a1b2c3d4-e5f6-7g8h-9i0j-k1l2m3n4o5p6'
   })
-  @Expose()
+  @Exclude()
   @IsUUID()
   @IsString()
   id: string
@@ -40,7 +40,7 @@ export class User {
     description: 'Email of the user',
     example: 'john_doe@example.com'
   })
-  @Expose()
+  @Exclude()
   @IsEmail()
   email: string
   

@@ -4,14 +4,16 @@ import React from "react";
 
 import { View } from "react-native";
 import { StatusBar } from "expo-status-bar";
-
-import StackRoutes from "@/routes/stack.routes";
+import { AuthRoutes } from '@/routes/auth.routes';
+import { AuthProvider } from '../context/AuthContext';
 
 export default function AppLayout() {
   return (
-    <View className="flex-1 bg-white">
-      <StatusBar style="dark"/>
-      <StackRoutes />
-    </View>
+    <AuthProvider>
+      <View className="flex-1 bg-white">
+        <StatusBar style="dark"/>
+        <AuthRoutes />
+      </View>
+    </AuthProvider>
   );
 }

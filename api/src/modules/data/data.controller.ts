@@ -5,10 +5,8 @@ import { Data } from 'src/models/data';
 
 import { Serializer } from 'src/infra/https/interceptors/serializer/serializer.decorator';
 
-import { AuthPayload } from '@models/auth';
-
 import { CreateData } from './data.dto';
-import { Public } from '@infra/https/decorators';
+import { GetCurrentUserId, Public } from '@infra/https/decorators';
 import { AtGuard } from '@infra/https/guards';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
@@ -28,8 +26,8 @@ export class DataController {
   @Post('/')
   create(
     @Body() data: CreateData,
-    @Request() req: AuthPayload
+    @GetCurrentUserId() user_id: string
   ): Promise<Data> {
-    return this.dataService.create(data, req.user_id);
+    return this.dataService.create(data, user_id);
   }
 }

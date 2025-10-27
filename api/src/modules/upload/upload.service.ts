@@ -7,6 +7,7 @@ import { FileType } from '@prisma/client';
 export class UploadService {
 
   uploadImage(images: Array<FileData>): FileUploadResponse {
+
     const filesMap = images.map(file => {
       return {
         type: FileType.image,
@@ -32,6 +33,7 @@ export class UploadService {
   }
 
   uploadSound(sound: Array<FileData>): FileUploadResponse  {
+
     const filesMap = sound.map(file => {
       return {
         type: FileType.sound,
