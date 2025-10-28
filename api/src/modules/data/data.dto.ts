@@ -1,4 +1,4 @@
-import { Files } from "@models/files"
+import { Files, FileUploadItem } from "@models/files"
 import { ApiProperty } from "@nestjs/swagger"
 import { Expose, Type } from "class-transformer"
 import { IsLatitude, IsLongitude, IsNumber, IsString, IsUUID } from "class-validator"
@@ -48,9 +48,9 @@ export class CreateData {
 
   @ApiProperty({
     description: 'Files associated with the data entry',
-    type: [Files]
+    type: [FileUploadItem]
   })
   @Expose()
-  @Type(() => Files)
-  files: Files[]
+  @Type(() => FileUploadItem)
+  files: FileUploadItem[]
 }

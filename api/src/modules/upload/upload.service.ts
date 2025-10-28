@@ -11,7 +11,7 @@ export class UploadService {
     const filesMap = images.map(file => {
       return {
         type: FileType.image,
-        url: `http://example.com/${file.filename}`
+        url: `${file.filename}`
       }
     }) as FileUploadResponse['files'];
 
@@ -23,7 +23,7 @@ export class UploadService {
       return {
         type: FileType.video,
         duration: file.size,
-        url: `http://example.com/${file.filename}`
+        url: `${file.filename}`
       }
     }) as FileUploadResponse['files'];
 
@@ -38,7 +38,7 @@ export class UploadService {
       return {
         type: FileType.sound,
         duration: file.size,
-        url: `http://example.com/${file.filename}`
+        url: `${file.filename}`
       }
     }) as FileUploadResponse['files'];
 

@@ -1,5 +1,6 @@
-import { Controller, Get, Post, Body, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Request, UseGuards, UseInterceptors } from '@nestjs/common';
 import { DataService } from './data.service';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 import { Data } from 'src/models/data';
 
@@ -23,11 +24,20 @@ export class DataController {
 
   @ApiBearerAuth('access-token')
   @UseGuards(AtGuard)
+  @Serializer(CreateData)
   @Post('/')
+  @UseInterceptors(FileInterceptor('files'))
   create(
-    @Body() data: CreateData,
+    @Body() data: any,
     @GetCurrentUserId() user_id: string
   ): Promise<Data> {
-    return this.dataService.create(data, user_id);
+    const parsedData: CreateData = {
+      ...data,
+      files: JSON.parse(data.files),
+      latitude: Number(data.latitude),
+      longitude: Number(data.longitude)
+    };
+
+    return this.dataService.create(parsedData, user_id);
   }
 }

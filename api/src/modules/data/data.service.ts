@@ -28,7 +28,7 @@ export class DataService {
           }
         },
         files: {
-          create: data.files
+          createMany: {data: data.files}
         }
       },
       select: {

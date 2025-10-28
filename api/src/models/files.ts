@@ -43,7 +43,7 @@ export class Files {
   url: string
 }
 
-class FileUploadItem {
+export class FileUploadItem {
   @ApiProperty({
     description: 'Type of the file',
     example: FileType.IMAGE
