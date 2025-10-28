@@ -1,5 +1,5 @@
 import { ImagePickerResult } from "@/@types/imagePicker";
-import { Entypo, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { Image, TouchableOpacity, View } from "react-native";
 
 interface FlatListItemProps {
@@ -17,7 +17,7 @@ export default function FlatListItem({ item, onPress, onRemove }: FlatListItemPr
         </TouchableOpacity>
       )}
       <View className="w-full h-full absolute bg-gray-900/70 rounded-lg items-center justify-center z-10">
-      <View className="p-4 rounded-full bg-violet-200">
+      <View className="p-4 rounded-md bg-violet-100">
         {item.type === 'video' ? (
           <Ionicons name="videocam" size={20} color="#6d28d9" />
         ) : (

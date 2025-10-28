@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { useEffect, useState } from 'react';
-import { Text, FlatList, View, ScrollView, TouchableOpacity } from 'react-native';
+import { Text, FlatList, View, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 
 import { navigate } from 'expo-router/build/global-state/routing';
 
@@ -12,54 +12,81 @@ import FlatListEmpty from '@/components/FlatListEmpty';
 import { useFocusEffect } from 'expo-router';
 import ModalPreview from '@/components/ModalPreview';
 import { ImagePickerResult } from '@/@types/imagePicker';
-import { Entypo, FontAwesome} from '@expo/vector-icons';
+import { Entypo, FontAwesome } from '@expo/vector-icons';
 
 import { useAuth } from '@/hooks/useAuth';
 import { FormDataDto } from '@/@types/form';
 import { TagConnected } from '@/components/TagConnected';
+import { useNetworkState } from 'expo-network';
+import useOnlineSubmit from '@/hooks/useOnlineSubmit';
 
 export type MediaType = 'images' | 'videos' | 'livePhotos';
 
 export default function Home() {
-  const { getAsyncStorage } = useAsyncStorage();
+  const { getAsyncStorage, setAsyncStorage, removeAsyncStorage } = useAsyncStorage();
   const [selectedSource, setSelectedSource] = useState<ImagePickerResult | null>(null);
   const [formData, setFormData] = useState<any>([]);
 
+  const { handleSaveOnline, sending } = useOnlineSubmit()
+
   const { user } = useAuth()
+
+  const { isConnected } = useNetworkState()
 
   useFocusEffect(useCallback(() => {
     const fetchData = async () => {
-      const data = await getAsyncStorage('formData');
-      setFormData(data ? data : []);
+      const data: Array<FormDataDto> = await getAsyncStorage('formData') as Array<FormDataDto>;
+      
+      if(data && data.length > 0){
+        setFormData(data ? data : []);
+        if(isConnected) {
+          await Promise.all(data.map(async (item, index) => {
+            const {status} = await handleSaveOnline(item);
+
+            if(status){
+              data.splice(index, 1)
+            }
+          }));  
+          setAsyncStorage('formData', data)
+          setFormData(data ? data : []);
+        }
+      } 
     };
     fetchData();
-  }, []))
+    
+  }, [isConnected]))
 
   return (
     <View className='flex-1 w-full bg-white relative'>
-      <View className='flex flex-col items-center justify-center w-full pt-16 pb-6 px-8 border-b border-gray-200'>
+      <View className='flex flex-col items-center justify-center w-full pt-6 pb-6 px-8 border-b border-gray-200'>
         <Text className='text-3xl font-bold text-gray-700'>Bem vindo ao offsync</Text>
-        <Text className='text-2xl font-bold text-gray-700'>Você esta na conta {user?.username}</Text>
+        <Text className='text-2xl font-bold text-gray-700'>{user?.username}</Text>
       </View>
-      <View className='flex flex-row itens-between justify-between p-4'>
-
-        <TagConnected connected="conectado" disconnected="desconectado"/>
-      </View>
-      <ScrollView className='w-full px-8 mt-4' contentContainerClassName='pb-20' showsVerticalScrollIndicator={false}>
+      <TagConnected/>
+      <ScrollView className='w-full px-6 mt-4' contentContainerClassName='pb-20' showsVerticalScrollIndicator={false}>
         {formData.length > 0 ? formData.map((data: FormDataDto, index: number) => (
           <View key={`key-form-${index}`}>
-            <View>
-              <Text className='text-base mb-2'>Titulo: {data.title}</Text>
-              <Text className='text-base mb-2'>Descrição: {data.description}</Text>
-            </View>
-            <View className='flex flex-row gap-4'>
-              <Text>latitude: {data?.latitude.toFixed(4)}</Text>
-              <Text>longitude: {data?.longitude.toFixed(4)}</Text>
+            <View className='flex flex-row items-start justify-between'>
+              <View>
+                <View>
+                  <Text className='text-base'>{data.title}</Text>
+                  <Text className='text-base'>{data.description}</Text>
+                </View>
+                <View className='flex flex-row gap-4'>
+                  <Text>{data?.latitude.toFixed(4)}</Text>
+                  <Text>{data?.longitude.toFixed(4)}</Text>
+                </View>
+              </View>
+              {sending &&
+                <View className="bg-violet-100 px-1 py-1 rounded-full">
+                  <ActivityIndicator color="#6d28d9" />
+                </View>
+              }
             </View>
             {data.midias && data.midias.length > 0 && (
               <View className='mb-4'>
                 <View className="flex-row items-center justify-between mb-4">
-                  <Text className='text-lg font-semibold text-gray-700'>Galeria de Mídia:</Text>
+                  <Text className='text-md font-semibold text-gray-700'>Galeria de Mídia:</Text>
                   {data.midias.length > 0 && (
                     <View className="bg-violet-100 px-3 py-1 rounded-full">
                       <Text className="text-violet-700 text-sm font-medium">
@@ -68,7 +95,7 @@ export default function Home() {
                     </View>
                   )}
                 </View>
-                <View className="bg-gray-50 rounded-xl p-2">
+                <View className="bg-gray-100 rounded-md p-2">
                   <FlatList
                     data={data.midias}
                     renderItem={({ item }) => (
@@ -102,7 +129,7 @@ export default function Home() {
                     </View>
                   )}
                 </View>
-                <View className="bg-gray-50 rounded-xl">
+                <View className="bg-gray-100 rounded-md">
                   <FlatList
                     data={data.sounds}
                     renderItem={({ item }) => (
@@ -123,7 +150,7 @@ export default function Home() {
         )): <Text>Não tem intens para envio</Text>}
       </ScrollView>
       <TouchableOpacity
-        className='absolute bg-violet-200 rounded-full p-5 bottom-10 right-10'
+        className='absolute bg-violet-200 rounded-full p-5 bottom-5 right-5'
         onPress={() => navigate('/form')}
         >
         <Entypo name='add-to-list' size={20} color='#6d28d9'/>

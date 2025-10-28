@@ -1,4 +1,4 @@
-import { Files, FileUploadItem, FileUploadResponse } from "./files";
+import { Files, FileUploadItem } from "./files";
 import { Locale } from "./locale";
 import { Region } from "./region";
 
@@ -10,7 +10,6 @@ export type Data = {
   region: Region
   files: Files[]
 }
-
 
 export type CreateData = {
   title: string

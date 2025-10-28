@@ -1,13 +1,19 @@
-import { api } from '@/service/api';
+import { useState } from 'react';
+import { ToastAndroid } from 'react-native';
 
 import { FormDataDto, ISaveResponse } from '@/@types/form';
 import { FileUploadResponse } from '@/service/models/files';
 import { UploadFile } from '@/service/models/upload';
 import { getFileNameFromUri } from '@/utils/getFileName';
 
+import { api } from '@/service/api';
+
 export const useOnlineSubmit = () => {
+  const [sending, setSend] = useState(false)
+
   const handleSaveOnline = async ({ title, description, latitude, longitude, region_id, sounds = [], midias = [] }: FormDataDto): Promise<ISaveResponse> => {
     try {
+      setSend(true)
       let images_res: FileUploadResponse = {files: []};
       let videos_res: FileUploadResponse = {files: []};
       let sound_res: FileUploadResponse = {files: []};
@@ -56,21 +62,29 @@ export const useOnlineSubmit = () => {
           ...sound_res.files
         ],
       });
+      console.log(res)
+      setSend(false)
+      
+      if(res) {
+        ToastAndroid.show('Arquivo salvo na nuvem com sucesso!', ToastAndroid.SHORT);
+        return {status: true};
+      }
 
-      if(res) return {status: true};
-
+      ToastAndroid.show('Erro ao salvar arquivo em nuvem!', ToastAndroid.SHORT);
       return {
         status: false
       };
     
     } catch (err) {
+      setSend(false)
+      ToastAndroid.show('Erro ao salvar arquivo em nuvem!', ToastAndroid.SHORT);
       return {
         status: false
       };
     }
   };
 
-  return { handleSaveOnline };
+  return { handleSaveOnline, sending };
 };
 
 export default useOnlineSubmit;

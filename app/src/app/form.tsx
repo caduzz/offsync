@@ -5,6 +5,7 @@ import { Text, View, TouchableOpacity, ScrollView, FlatList, ToastAndroid, Activ
 import * as Location from 'expo-location';
 
 import * as ImagePicker from 'expo-image-picker';
+
 import { useNetworkState } from 'expo-network';
 
 import { useAudioRecording } from '@/hooks/useAudioRecording';
@@ -25,7 +26,6 @@ import { useNavigation } from 'expo-router';
 import { FormDataDto } from '@/@types/form';
 import useOnlineSubmit from '@/hooks/useOnlineSubmit';
 import useOfflineSubmit from '@/hooks/useOfflineSubmit';
-import { formatTime } from '@/utils/formatData';
 
 export type MediaType = 'images' | 'videos' | 'livePhotos';
 
@@ -37,7 +37,7 @@ export default function Form() {
 
   const { toggleRecording, removeRecord, recording, records, resetRecord, isProcessing } = useAudioRecording();
 
-  const { handleSaveOnline } = useOnlineSubmit();
+  const { handleSaveOnline, sending } = useOnlineSubmit();
   const { handleSaveOffline } = useOfflineSubmit();
 
   const navigation = useNavigation();
@@ -83,9 +83,7 @@ export default function Form() {
           if (!statusOnline){
             const saveOffline = await handleSaveOffline(payload)
             statusOffline = saveOffline.status;
-          }
-
-          console.log(statusOffline, statusOnline)
+          } 
 
           if(statusOnline || statusOffline) {
             reset();
@@ -101,22 +99,32 @@ export default function Form() {
 
   const pickImage = async (type: 'library' | 'camera', mediaTypes: MediaType | MediaType[]) => {
     let result;
-    if (type === 'library') {
-      result = await ImagePicker.launchImageLibraryAsync({ 
-        mediaTypes: ['images', 'videos'], 
-        allowsMultipleSelection: true 
+
+    if (type === "library") {
+      result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes,
+        allowsMultipleSelection: true,
+        quality: 0.1,
+        videoQuality: ImagePicker.UIImagePickerControllerQualityType.VGA640x480
       });
     } else {
-      result = await ImagePicker.launchCameraAsync({ mediaTypes });
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes,
+        quality: 0.1,
+        videoQuality: ImagePicker.UIImagePickerControllerQualityType.VGA640x480
+      });
     }
-    if (result.assets && result.assets[0].uri) {
-      const newImage: ImagePickerResult[] = result.assets.map(asset => ({
-        id: asset.assetId || asset.uri,
-        uri: asset.uri,
-        type: asset.type === 'video' ? 'video' : 'image',
-      }));
-      
-      setSource(prev => [...prev, ...newImage]);
+
+    if (result.assets && result.assets.length > 0) {
+
+      const newImages: ImagePickerResult[] =
+        result.assets.map((asset) => ({
+          id: asset.assetId || asset.uri,
+          uri: asset.uri,
+          type: asset.type === "video" ? "video" : "image",
+        }))
+
+      setSource((prev) => [...prev, ...newImages]);
     }
   };
 
@@ -140,8 +148,8 @@ export default function Form() {
 
   return (
     <View className='flex-1 w-full bg-white'>
-      <View className='flex flex-row items-center justify-center w-full pt-16 pb-6 px-8 border-b border-gray-200 relative'>
-        <TouchableOpacity onPress={navigation.goBack} className='absolute left-6 top-[60px]'>
+      <View className='flex flex-row items-center justify-center w-full pt-6 pb-6 px-8 border-b border-gray-200 relative'>
+        <TouchableOpacity onPress={navigation.goBack} className='absolute left-6 top-7'>
           <Entypo name='chevron-left' color="#374151" size={25}/>
         </TouchableOpacity>
         <Text className='text-3xl font-bold text-gray-700'>Formulario de dados</Text>
@@ -161,10 +169,10 @@ export default function Form() {
             onPress={getInitialLocation}
           >
             {!loading ?
-              <Ionicons name='reload' size={20} color='#6d28d9' className='animate-spin' />
+              <Ionicons name='reload' size={20} color='#286fd9' className='animate-spin' />
               :
               <ActivityIndicator
-                color="#6d28d9"
+                color="#286fd9"
               />
             }
           </Button>
@@ -202,7 +210,7 @@ export default function Form() {
             <View className='flex-row justify-between mb-4 gap-2'>
               <Button
                 onPress={() => pickImage('library', ['images', 'videos'])}
-                className="flex-1 mr-2"
+                className="flex-1"
               >
                 <View className="flex-row items-center gap-2">
                   <Entypo name='images' size={18} color='gray' />
@@ -231,7 +239,7 @@ export default function Form() {
               </Button>
             </View>
 
-            <View className="bg-gray-50 rounded-xl p-2">
+            <View className="bg-gray-100 rounded-md p-2">
               <FlatList
                 data={source}
                 renderItem={({ item }) => (
@@ -259,7 +267,7 @@ export default function Form() {
               Gravação de Áudio
             </Text>
             
-            <View className="bg-gray-50 rounded-xl p-4">
+            <View className="bg-gray-100 rounded-md p-2">
               <TouchableOpacity 
                 onPress={toggleRecording}
                 className={`py-3 px-6 rounded-lg ${recording?.isRecording ? 'bg-red-600' : 'bg-violet-700'} disabled:bg-gray-400`}
@@ -292,8 +300,15 @@ export default function Form() {
             <Button 
               onPress={handleSubmit(saveFormData)}
               className="py-4"
+              disabled={sending}
             >
-              <Text className="text-base font-semibold">Enviar Formulário</Text>
+              {sending ? 
+                <ActivityIndicator
+                  color="#6d28d9"
+                />
+                :
+                <Text className="text-base font-semibold">Enviar Formulário</Text>
+              }
             </Button>
           </View>
         </View>

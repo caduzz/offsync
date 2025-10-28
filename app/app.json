@@ -21,7 +21,14 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION"
+      ],
+      "package": "com.caduzz.offsync"
     },
     "web": {
       "bundler": "metro",
@@ -31,6 +38,7 @@
     "plugins": [
       "expo-router",
       "expo-web-browser",
+      "react-native-compressor",
       [
         "expo-image-picker",
         {
@@ -61,6 +69,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "69e09a26-63a1-4da3-9b76-539d1417f305"
+      }
     }
   }
 }
