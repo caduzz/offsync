@@ -104,14 +104,14 @@ export default function Form() {
       result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes,
         allowsMultipleSelection: true,
-        quality: 0.1,
-        videoQuality: ImagePicker.UIImagePickerControllerQualityType.VGA640x480
+        quality: 0.5,
+        videoQuality: ImagePicker.UIImagePickerControllerQualityType.Medium
       });
     } else {
       result = await ImagePicker.launchCameraAsync({
         mediaTypes,
-        quality: 0.1,
-        videoQuality: ImagePicker.UIImagePickerControllerQualityType.VGA640x480
+        quality: 0.5,
+        videoQuality: ImagePicker.UIImagePickerControllerQualityType.IFrame960x540
       });
     }
 
