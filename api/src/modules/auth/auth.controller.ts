@@ -38,6 +38,7 @@ export class AuthController {
     return this.authService.logout(user_id);
   }
 
+  @Public()
   @UseGuards(RtGuard)
   @Post('/refresh')
   @ApiBearerAuth('access-token')
