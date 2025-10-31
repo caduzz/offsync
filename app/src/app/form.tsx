@@ -26,6 +26,8 @@ import { useNavigation } from 'expo-router';
 import { FormDataDto } from '@/@types/form';
 import useOnlineSubmit from '@/hooks/useOnlineSubmit';
 import useOfflineSubmit from '@/hooks/useOfflineSubmit';
+import Dropdown, { OptionItemDropDown } from '@/components/ui/dropdown';
+import { api } from '@/service/api';
 
 export type MediaType = 'images' | 'videos' | 'livePhotos';
 
@@ -34,9 +36,10 @@ export default function Form() {
   const [ source, setSource ] = useState<ImagePickerResult[]>([]);
   const [ location, setLocation ] = useState<Location.LocationObject>()
   const [ selectedSource, setSelectedSource ] = useState<ImagePickerResult | null>(null);
+  const [ regions, setRegions ] = useState<OptionItemDropDown[]| []>([])
 
   const { toggleRecording, removeRecord, recording, records, resetRecord, isProcessing } = useAudioRecording();
-
+  
   const { handleSaveOnline, sending } = useOnlineSubmit();
   const { handleSaveOffline } = useOfflineSubmit();
 
@@ -48,6 +51,7 @@ export default function Form() {
     defaultValues: {
       title: '',
       description: '',
+      region: ''
     }
   });
 
@@ -68,9 +72,9 @@ export default function Form() {
           const payload: FormDataDto = {
             title: data.title,
             description: data.description,
+            region_id: data.region,
             midias: source,
             sounds: records,
-            region_id: "bde4f786-c3b0-4ca2-952f-16a9140097a9",
             latitude: location.coords.latitude,
             longitude: location.coords.longitude
           };
@@ -142,8 +146,21 @@ export default function Form() {
    }
   }
 
+  const getRegions = async () => {
+    const dataRegion = await api.region.getAll()
+    const dataItem = dataRegion.map(item => {
+      return {
+        label: item.name,
+        value: item.id
+      }
+    }) as OptionItemDropDown[]
+    
+    setRegions(dataItem)
+  }
+
   useEffect(() => {
     getInitialLocation()
+    getRegions()
   }, [])
 
   return (
@@ -169,10 +186,10 @@ export default function Form() {
             onPress={getInitialLocation}
           >
             {!loading ?
-              <Ionicons name='reload' size={20} color='#286fd9' className='animate-spin' />
+              <Ionicons name='reload' size={20} color='#6d28d9' className='animate-spin' />
               :
               <ActivityIndicator
-                color="#286fd9"
+                color="#6d28d9"
               />
             }
           </Button>
@@ -192,7 +209,13 @@ export default function Form() {
               <Input label='Descrição' placeholder='Digite sua descrição...' value={value} onChangeText={onChange} />
             )}
           />
-
+          <Controller
+            control={control}
+            name="region"
+            render={({ field: { onChange, value } }) => (
+              <Dropdown data={regions} select={value} onChange={({value}) => onChange(value)} placeholder='Selecione o estado'/>
+            )}
+          />
           <View className='mt-2'>
             <View className="flex-row items-center justify-between">
               <Text className="text-lg font-semibold text-gray-700">

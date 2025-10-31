@@ -62,7 +62,7 @@ export const useOnlineSubmit = () => {
           ...sound_res.files
         ],
       });
-      console.log(res)
+
       setSend(false)
       
       if(res) {

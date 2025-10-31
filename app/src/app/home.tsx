@@ -29,7 +29,7 @@ export default function Home() {
 
   const { handleSaveOnline, sending } = useOnlineSubmit()
 
-  const { user } = useAuth()
+  const { user, logOut } = useAuth()
 
   const { isConnected } = useNetworkState()
 
@@ -61,6 +61,9 @@ export default function Home() {
       <View className='flex flex-col items-center justify-center w-full pt-6 pb-6 px-8 border-b border-gray-200'>
         <Text className='text-3xl font-bold text-gray-700'>Bem vindo ao offsync</Text>
         <Text className='text-2xl font-bold text-gray-700'>{user?.username}</Text>
+        <TouchableOpacity onPress={logOut}>
+          <Text>Logout</Text>
+        </TouchableOpacity>
       </View>
       <TagConnected/>
       <ScrollView className='w-full px-6 mt-4' contentContainerClassName='pb-20' showsVerticalScrollIndicator={false}>

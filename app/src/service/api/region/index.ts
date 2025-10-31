@@ -1,7 +1,7 @@
 import { axios } from '../axios';
 import { Region } from '@/service/models/region';
 
-async function getAll(): Promise<Region | []>{
+async function getAll(): Promise<Region[] | []>{
   try {
     const { data } = await axios.get('/region');
     return data;
