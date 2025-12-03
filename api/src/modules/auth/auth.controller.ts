@@ -2,11 +2,12 @@ import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs
 import { AuthService } from './auth.service';
 import { AuthDto } from './auth.dto';
 import { Tokens } from './types';
-import { CreateUser } from '@models/user';
+
 
 import { AtGuard, RtGuard } from '@infra/https/guards';
 import { GetCurrentUser, GetCurrentUserId, Public } from '@infra/https/decorators';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateUser } from 'src/models/user';
 
 
 @Controller('auth')

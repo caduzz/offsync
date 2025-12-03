@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { PrismaService } from 'src/infra/prisma/prisma.service';
 import { CreateData } from './data.dto';
-import { Data } from '@models/data';
+import { Data } from 'src/models/data';
 
 @Injectable()
 export class DataService {

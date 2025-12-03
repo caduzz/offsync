@@ -2,8 +2,9 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { RegionService } from './region.service';
 import { AtGuard } from '@infra/https/guards';
 import { Serializer } from '@infra/https/interceptors/serializer/serializer.decorator';
-import { CreateRegion, Region } from '@models/region';
+
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateRegion, Region } from 'src/models/region';
 
 @Controller('region')
 export class RegionController {

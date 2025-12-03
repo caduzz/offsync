@@ -31,7 +31,7 @@ export class WebDavService {
       },
       body: uint8Array,
     });
-
+    console.log(response, url)
     if (!response.ok) {
       throw new Error(`Failed to upload file to WebDAV: ${response.status} ${response.statusText}`);
     }
@@ -51,6 +51,7 @@ export class WebDavService {
         'Authorization': `Basic ${auth}`,
       },
     });
+    console.log(response, url)
 
     if (!response.ok && response.status !== 404) {
       throw new Error(`Failed to delete file from WebDAV: ${response.status} ${response.statusText}`);
@@ -69,6 +70,7 @@ export class WebDavService {
         'Authorization': `Basic ${auth}`,
       },
     });
+    console.log(response, url)
 
     return response.ok;
   }

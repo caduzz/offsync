@@ -4,12 +4,11 @@ import { UserService } from '../user/user.service';
 import { Tokens } from './types';
 import { authConfig } from 'src/config/auth.config';
 
-import { AuthPayload } from '@models/auth';
-
 import { AuthDto } from './auth.dto';
-import { CreateUser } from '@models/user';
 import { BadRequestError } from 'src/errors/BadRequestError';
 import { ForbiddenError } from 'src/errors/ForbiddenError';
+import { AuthPayload } from 'src/models/auth';
+import { CreateUser } from 'src/models/user';
 
 @Injectable()
 export class AuthService {

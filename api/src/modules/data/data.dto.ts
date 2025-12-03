@@ -1,7 +1,8 @@
-import { Files, FileUploadItem } from "@models/files"
+
 import { ApiProperty } from "@nestjs/swagger"
 import { Expose, Type } from "class-transformer"
 import { IsLatitude, IsLongitude, IsNumber, IsString, IsUUID } from "class-validator"
+import { FileUploadItem } from "src/models/files"
 
 export class CreateData {
   @ApiProperty({

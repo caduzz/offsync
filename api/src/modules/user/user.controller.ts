@@ -1,6 +1,6 @@
-import { Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
-import { CreateUser, User } from '@models/user';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 
+import { User } from 'src/models/user';
 import { AtGuard } from '@infra/https/guards';
 import { GetCurrentUserId } from '@infra/https/decorators';
 import { ApiBearerAuth } from '@nestjs/swagger';

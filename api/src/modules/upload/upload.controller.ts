@@ -5,9 +5,10 @@ import { UploadVideoInterceptor } from '@infra/https/interceptors/upload/upload.
 import { UploadImageInterceptor } from '@infra/https/interceptors/upload/upload.image.interceptor';
 import { UploadSoundInterceptor } from '@infra/https/interceptors/upload/upload.sound.interceptor';
 import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
-import { Public } from '@infra/https/decorators';
+
 import { AtGuard } from '@infra/https/guards';
-import { FileUploadResponse } from '@models/files';
+import { FileUploadResponse } from 'src/models/files';
+
 
 @Controller('upload')
 export class UploadController {
@@ -31,7 +32,7 @@ export class UploadController {
   })
   uploadImage(
     @UploadedFiles() image: FileData[]
-  ): FileUploadResponse{
+  ): Promise<FileUploadResponse> {
     return this.uploadService.uploadImage(image);
   }
 
@@ -53,7 +54,7 @@ export class UploadController {
   })
   uploadVideo(
     @UploadedFiles() video: FileData[]
-  ) {
+  ): Promise<FileUploadResponse> {
     return this.uploadService.uploadVideo(video);
   }
 
@@ -75,7 +76,7 @@ export class UploadController {
   })
   uploadSound(
     @UploadedFiles() sound: FileData[]
-  ): FileUploadResponse {
+  ): Promise<FileUploadResponse> {
     return this.uploadService.uploadSound(sound);
   }
 

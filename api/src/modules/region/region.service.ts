@@ -1,6 +1,8 @@
-import { CreateRegion, Region } from '@models/region';
+
 import { Injectable } from '@nestjs/common';
+import { Region } from '@prisma/client';
 import { PrismaService } from '@prisma/prisma.service';
+import { CreateRegion } from 'src/models/region';
 
 @Injectable()
 export class RegionService {

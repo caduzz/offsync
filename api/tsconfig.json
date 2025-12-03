@@ -44,10 +44,10 @@
         "src/services/*"
       ],
       "@models/": [
-        "src/models"
+        "src/modules/models"
       ],
       "@models/*": [
-        "src/models/*"
+        "src/modules/models/*"
       ],
     }
   }
