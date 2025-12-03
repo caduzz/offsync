@@ -1,9 +1,7 @@
 import { UseInterceptors } from "@nestjs/common";
 import { FilesInterceptor } from "@nestjs/platform-express";
 import { MulterOptions } from "@nestjs/platform-express/multer/interfaces/multer-options.interface";
-import { randomUUID } from "crypto";
-import { diskStorage } from "multer";
-import { extname } from "path";
+import { memoryStorage } from "multer";
 
 export type FileData = Express.Multer.File;
 
@@ -14,13 +12,7 @@ export function UploadInterceptor(fileFilter: MulterOptions['fileFilter']) {
       limits: {
         fileSize: 20 * 1024 * 1024,
       },
-      storage: diskStorage({
-        destination: './temp',
-        filename: (req, file, callback) => {
-          const fileName = `${file.fieldname}-${randomUUID()}${extname(file.originalname)}`;
-          callback(null, fileName)
-        }
-      })
+      storage: memoryStorage(), // Armazena em memória (buffer) em vez de disco
     })
   )
 }

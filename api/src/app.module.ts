@@ -5,13 +5,15 @@ import { DataModule } from './modules/data/data.module';
 import { UploadModule } from './modules/upload/upload.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UserModule } from './modules/user/user.module';
+import { RegionModule } from './modules/region/region.module';
 import { APP_GUARD } from '@nestjs/core';
 import { AtGuard } from '@infra/https/guards';
-import { RegionModule } from './modules/region/region.module';
+import { WebDavModule } from '@infra/webdav/webdav.module';
 
 @Module({
   imports: [
     PrismaModule,
+    WebDavModule,
     UserModule,
     DataModule,
     UploadModule,
